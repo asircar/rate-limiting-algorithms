@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rate Limiting Algorithms — Interactive Visual Guide</title>
+    <meta name="description" content="An interactive visual guide to understanding rate limiting algorithms: Token Bucket, Leaking Bucket, Fixed Window Counter, Sliding Window Log, and Sliding Window Counter.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Floating particles background -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Hero Section -->
+    <header class="hero" id="hero">
+        <nav class="nav">
+            <div class="nav-logo">
+                <span class="logo-icon">⚡</span>
+                <span class="logo-text">RateLimiter</span>
+            </div>
+            <div class="nav-links">
+                <a href="#token-bucket">Token Bucket</a>
+                <a href="#leaking-bucket">Leaking Bucket</a>
+                <a href="#fixed-window">Fixed Window</a>
+                <a href="#sliding-log">Sliding Log</a>
+                <a href="#sliding-counter">Sliding Counter</a>
+                <a href="#comparison">Compare</a>
+            </div>
+        </nav>
+        <div class="hero-content">
+            <div class="hero-badge">Interactive Visual Guide</div>
+            <h1 class="hero-title">
+                Understanding<br>
+                <span class="gradient-text">Rate Limiting</span><br>
+                Algorithms
+            </h1>
+            <p class="hero-subtitle">
+                Explore how different rate limiting strategies work through interactive visualizations. 
+                Click, experiment, and build intuition for each algorithm.
+            </p>
+            <div class="hero-actions">
+                <a href="#token-bucket" class="btn btn-primary">Start Exploring</a>
+                <a href="#comparison" class="btn btn-secondary">View Comparison</a>
+            </div>
+            <div class="hero-stats">
+                <div class="stat">
+                    <span class="stat-number">5</span>
+                    <span class="stat-label">Algorithms</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">∞</span>
+                    <span class="stat-label">Interactive</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">0</span>
+                    <span class="stat-label">Prerequisites</span>
+                </div>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <span>Scroll to explore</span>
+            <div class="scroll-arrow"></div>
+        </div>
+    </header>
+
+    <!-- Introduction -->
+    <section class="intro-section" id="intro">
+        <div class="container">
+            <div class="intro-grid">
+                <div class="intro-text">
+                    <h2>Why Rate Limiting?</h2>
+                    <p>
+                        Rate limiting is a critical technique used to control the rate of requests that clients can make to an API or service. 
+                        It protects your systems from being overwhelmed, ensures fair usage among clients, and prevents abuse.
+                    </p>
+                    <div class="intro-cards">
+                        <div class="intro-card">
+                            <div class="intro-card-icon">🛡️</div>
+                            <h4>Protection</h4>
+                            <p>Prevent DDoS attacks and resource exhaustion</p>
+                        </div>
+                        <div class="intro-card">
+                            <div class="intro-card-icon">⚖️</div>
+                            <h4>Fairness</h4>
+                            <p>Ensure equal access for all clients</p>
+                        </div>
+                        <div class="intro-card">
+                            <div class="intro-card-icon">💰</div>
+                            <h4>Cost Control</h4>
+                            <p>Manage infrastructure costs effectively</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="intro-visual">
+                    <div class="server-illustration">
+                        <div class="server-box">
+                            <div class="server-label">API Server</div>
+                            <div class="server-meter">
+                                <div class="meter-fill" id="introMeter"></div>
+                            </div>
+                            <div class="server-status">Healthy</div>
+                        </div>
+                        <div class="request-rain" id="requestRain"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Algorithm 1: Token Bucket -->
+    <section class="algo-section" id="token-bucket">
+        <div class="container">
+            <div class="algo-header">
+                <div class="algo-number">01</div>
+                <div class="algo-title-group">
+                    <h2 class="algo-title">Token Bucket</h2>
+                    <p class="algo-tagline">The most flexible rate limiter — allows controlled bursts</p>
+                </div>
+            </div>
+
+            <div class="algo-content">
+                <div class="algo-explanation">
+                    <div class="explanation-block">
+                        <h3>How it works</h3>
+                        <ol>
+                            <li>A bucket holds tokens up to a <strong>maximum capacity</strong></li>
+                            <li>Tokens are added at a <strong>constant refill rate</strong></li>
+                            <li>Each request <strong>consumes one token</strong></li>
+                            <li>If no tokens available, the request is <strong>rejected</strong></li>
+                            <li>Allows <strong>bursty traffic</strong> when tokens have accumulated</li>
+                        </ol>
+                    </div>
+                    <div class="explanation-block highlight-block">
+                        <h3>💡 Key Insight</h3>
+                        <p>Token Bucket is widely used (e.g., by <strong>Amazon</strong> and <strong>Stripe</strong>) because it smooths out traffic while still allowing short bursts. If a client hasn't made requests in a while, they can "spend" their accumulated tokens in a burst.</p>
+                    </div>
+                    <div class="algo-params">
+                        <h3>Parameters</h3>
+                        <div class="param-group">
+                            <label>Bucket Capacity</label>
+                            <input type="range" id="tb-capacity" min="3" max="10" value="5">
+                            <span class="param-value" id="tb-capacity-val">5</span>
+                        </div>
+                        <div class="param-group">
+                            <label>Refill Rate (tokens/sec)</label>
+                            <input type="range" id="tb-refill" min="1" max="5" value="1" step="1">
+                            <span class="param-value" id="tb-refill-val">1</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="algo-visualization">
+                    <div class="viz-container" id="tb-viz">
+                        <div class="bucket-visual">
+                            <div class="bucket-label">Token Bucket</div>
+                            <div class="bucket-outer">
+                                <div class="bucket-body">
+                                    <div class="bucket-tokens" id="tb-tokens-container"></div>
+                                    <div class="bucket-fill" id="tb-fill"></div>
+                                </div>
+                                <div class="bucket-capacity-label" id="tb-cap-label">0 / 5</div>
+                            </div>
+                            <div class="refill-indicator" id="tb-refill-indicator">
+                                <span class="refill-icon">💧</span>
+                                <span>Refilling...</span>
+                            </div>
+                        </div>
+                        <div class="request-area">
+                            <button class="send-request-btn" id="tb-send" data-algo="token-bucket">
+                                <span class="btn-icon">📨</span>
+                                Send Request
+                            </button>
+                            <button class="burst-btn" id="tb-burst" data-algo="token-bucket">
+                                <span class="btn-icon">💥</span>
+                                Send Burst (5)
+                            </button>
+                            <button class="reset-btn" id="tb-reset" data-algo="token-bucket">
+                                Reset
+                            </button>
+                        </div>
+                    </div>
+                    <div class="request-log" id="tb-log">
+                        <h4>Request Log</h4>
+                        <div class="log-entries" id="tb-log-entries"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Algorithm 2: Leaking Bucket -->
+    <section class="algo-section" id="leaking-bucket">
+        <div class="container">
+            <div class="algo-header">
+                <div class="algo-number">02</div>
+                <div class="algo-title-group">
+                    <h2 class="algo-title">Leaking Bucket</h2>
+                    <p class="algo-tagline">Smooths out bursty traffic — processes requests at a constant rate</p>
+                </div>
+            </div>
+
+            <div class="algo-content">
+                <div class="algo-explanation">
+                    <div class="explanation-block">
+                        <h3>How it works</h3>
+                        <ol>
+                            <li>Requests are added to a <strong>queue (bucket)</strong></li>
+                            <li>The queue has a <strong>fixed size</strong>; if full, new requests are dropped</li>
+                            <li>Requests are <strong>processed (leaked)</strong> from the queue at a constant rate</li>
+                            <li>This ensures a <strong>steady output rate</strong> regardless of input burstiness</li>
+                        </ol>
+                    </div>
+                    <div class="explanation-block highlight-block">
+                        <h3>💡 Key Insight</h3>
+                        <p>Unlike Token Bucket, Leaking Bucket <strong>does not allow bursts</strong> — it always processes at a constant rate. Think of it like water dripping from a leaky bucket: no matter how fast you pour water in, it drips out at the same pace.</p>
+                    </div>
+                    <div class="algo-params">
+                        <h3>Parameters</h3>
+                        <div class="param-group">
+                            <label>Queue Size</label>
+                            <input type="range" id="lb-queue-size" min="3" max="10" value="5">
+                            <span class="param-value" id="lb-queue-size-val">5</span>
+                        </div>
+                        <div class="param-group">
+                            <label>Leak Rate (req/sec)</label>
+                            <input type="range" id="lb-leak-rate" min="1" max="5" value="1" step="1">
+                            <span class="param-value" id="lb-leak-rate-val">1</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="algo-visualization">
+                    <div class="viz-container" id="lb-viz">
+                        <div class="leaky-bucket-visual">
+                            <div class="bucket-label">Leaking Bucket Queue</div>
+                            <div class="lb-queue" id="lb-queue"></div>
+                            <div class="lb-queue-capacity" id="lb-queue-cap">0 / 5</div>
+                            <div class="lb-drip">
+                                <div class="drip-animation" id="lb-drip-anim"></div>
+                                <span class="drip-label">Processing at constant rate</span>
+                            </div>
+                            <div class="lb-processed">
+                                <div class="processed-label">✅ Processed</div>
+                                <span class="processed-count" id="lb-processed-count">0</span>
+                            </div>
+                        </div>
+                        <div class="request-area">
+                            <button class="send-request-btn" id="lb-send" data-algo="leaking-bucket">
+                                <span class="btn-icon">📨</span>
+                                Send Request
+                            </button>
+                            <button class="burst-btn" id="lb-burst" data-algo="leaking-bucket">
+                                <span class="btn-icon">💥</span>
+                                Send Burst (5)
+                            </button>
+                            <button class="reset-btn" id="lb-reset" data-algo="leaking-bucket">
+                                Reset
+                            </button>
+                        </div>
+                    </div>
+                    <div class="request-log" id="lb-log">
+                        <h4>Request Log</h4>
+                        <div class="log-entries" id="lb-log-entries"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Algorithm 3: Fixed Window Counter -->
+    <section class="algo-section" id="fixed-window">
+        <div class="container">
+            <div class="algo-header">
+                <div class="algo-number">03</div>
+                <div class="algo-title-group">
+                    <h2 class="algo-title">Fixed Window Counter</h2>
+                    <p class="algo-tagline">Simple and memory-efficient — counts requests in fixed time windows</p>
+                </div>
+            </div>
+
+            <div class="algo-content">
+                <div class="algo-explanation">
+                    <div class="explanation-block">
+                        <h3>How it works</h3>
+                        <ol>
+                            <li>Time is divided into <strong>fixed windows</strong> (e.g., every 10 seconds)</li>
+                            <li>Each window has a <strong>counter</strong> that starts at zero</li>
+                            <li>Each request <strong>increments the counter</strong></li>
+                            <li>If the counter exceeds the <strong>limit</strong>, requests are rejected</li>
+                            <li>When a new window begins, the counter <strong>resets to zero</strong></li>
+                        </ol>
+                    </div>
+                    <div class="explanation-block highlight-block">
+                        <h3>⚠️ The Boundary Problem</h3>
+                        <p>The main weakness: a burst of requests at the <strong>end of one window</strong> and the <strong>start of the next</strong> can effectively allow <strong>2x the rate limit</strong>. Watch the visualization to see this in action!</p>
+                    </div>
+                    <div class="algo-params">
+                        <h3>Parameters</h3>
+                        <div class="param-group">
+                            <label>Window Size (seconds)</label>
+                            <input type="range" id="fw-window-size" min="5" max="15" value="10">
+                            <span class="param-value" id="fw-window-size-val">10</span>
+                        </div>
+                        <div class="param-group">
+                            <label>Max Requests per Window</label>
+                            <input type="range" id="fw-max-requests" min="3" max="10" value="5">
+                            <span class="param-value" id="fw-max-requests-val">5</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="algo-visualization">
+                    <div class="viz-container" id="fw-viz">
+                        <div class="fw-visual">
+                            <div class="fw-timeline" id="fw-timeline">
+                                <div class="fw-window active" id="fw-current-window">
+                                    <div class="fw-window-header">
+                                        <span class="fw-window-label">Current Window</span>
+                                        <span class="fw-timer" id="fw-timer">10s</span>
+                                    </div>
+                                    <div class="fw-counter-display">
+                                        <span class="fw-count" id="fw-count">0</span>
+                                        <span class="fw-separator">/</span>
+                                        <span class="fw-limit" id="fw-limit">5</span>
+                                    </div>
+                                    <div class="fw-bar">
+                                        <div class="fw-bar-fill" id="fw-bar-fill"></div>
+                                    </div>
+                                    <div class="fw-progress-bar">
+                                        <div class="fw-progress-fill" id="fw-progress-fill"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="fw-history" id="fw-history">
+                                <h4>Window History</h4>
+                                <div class="fw-history-entries" id="fw-history-entries"></div>
+                            </div>
+                        </div>
+                        <div class="request-area">
+                            <button class="send-request-btn" id="fw-send" data-algo="fixed-window">
+                                <span class="btn-icon">📨</span>
+                                Send Request
+                            </button>
+                            <button class="burst-btn" id="fw-burst" data-algo="fixed-window">
+                                <span class="btn-icon">💥</span>
+                                Send Burst (5)
+                            </button>
+                            <button class="reset-btn" id="fw-reset" data-algo="fixed-window">
+                                Reset
+                            </button>
+                        </div>
+                    </div>
+                    <div class="request-log" id="fw-log">
+                        <h4>Request Log</h4>
+                        <div class="log-entries" id="fw-log-entries"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Algorithm 4: Sliding Window Log -->
+    <section class="algo-section" id="sliding-log">
+        <div class="container">
+            <div class="algo-header">
+                <div class="algo-number">04</div>
+                <div class="algo-title-group">
+                    <h2 class="algo-title">Sliding Window Log</h2>
+                    <p class="algo-tagline">Precise rate limiting — tracks every request timestamp</p>
+                </div>
+            </div>
+
+            <div class="algo-content">
+                <div class="algo-explanation">
+                    <div class="explanation-block">
+                        <h3>How it works</h3>
+                        <ol>
+                            <li>Keeps a <strong>log of timestamps</strong> for each request</li>
+                            <li>When a new request arrives, <strong>remove outdated</strong> entries (older than window size)</li>
+                            <li>Count remaining entries — if count &lt; limit, <strong>allow</strong> and add timestamp</li>
+                            <li>If count ≥ limit, <strong>reject</strong> the request</li>
+                            <li>The window <strong>slides continuously</strong> — no boundary issues!</li>
+                        </ol>
+                    </div>
+                    <div class="explanation-block highlight-block">
+                        <h3>💡 Key Insight</h3>
+                        <p>This solves the Fixed Window boundary problem but requires <strong>more memory</strong> — it stores every request timestamp. The trade-off is <strong>precision vs. memory usage</strong>.</p>
+                    </div>
+                    <div class="algo-params">
+                        <h3>Parameters</h3>
+                        <div class="param-group">
+                            <label>Window Size (seconds)</label>
+                            <input type="range" id="sl-window-size" min="5" max="15" value="10">
+                            <span class="param-value" id="sl-window-size-val">10</span>
+                        </div>
+                        <div class="param-group">
+                            <label>Max Requests per Window</label>
+                            <input type="range" id="sl-max-requests" min="3" max="10" value="5">
+                            <span class="param-value" id="sl-max-requests-val">5</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="algo-visualization">
+                    <div class="viz-container" id="sl-viz">
+                        <div class="sl-visual">
+                            <div class="sl-timeline-container">
+                                <div class="sl-timeline" id="sl-timeline">
+                                    <div class="sl-window-overlay" id="sl-window-overlay"></div>
+                                    <canvas id="sl-canvas" width="600" height="120"></canvas>
+                                </div>
+                                <div class="sl-info">
+                                    <div class="sl-info-item">
+                                        <span class="sl-info-label">Requests in window:</span>
+                                        <span class="sl-info-value" id="sl-count">0 / 5</span>
+                                    </div>
+                                    <div class="sl-info-item">
+                                        <span class="sl-info-label">Stored timestamps:</span>
+                                        <span class="sl-info-value" id="sl-timestamps">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="sl-log-visual" id="sl-log-visual">
+                                <h4>Timestamp Log</h4>
+                                <div class="sl-entries" id="sl-entries"></div>
+                            </div>
+                        </div>
+                        <div class="request-area">
+                            <button class="send-request-btn" id="sl-send" data-algo="sliding-log">
+                                <span class="btn-icon">📨</span>
+                                Send Request
+                            </button>
+                            <button class="burst-btn" id="sl-burst" data-algo="sliding-log">
+                                <span class="btn-icon">💥</span>
+                                Send Burst (5)
+                            </button>
+                            <button class="reset-btn" id="sl-reset" data-algo="sliding-log">
+                                Reset
+                            </button>
+                        </div>
+                    </div>
+                    <div class="request-log" id="sl-log">
+                        <h4>Request Log</h4>
+                        <div class="log-entries" id="sl-log-entries"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Algorithm 5: Sliding Window Counter -->
+    <section class="algo-section" id="sliding-counter">
+        <div class="container">
+            <div class="algo-header">
+                <div class="algo-number">05</div>
+                <div class="algo-title-group">
+                    <h2 class="algo-title">Sliding Window Counter</h2>
+                    <p class="algo-tagline">Best of both worlds — combines Fixed Window efficiency with Sliding Window accuracy</p>
+                </div>
+            </div>
+
+            <div class="algo-content">
+                <div class="algo-explanation">
+                    <div class="explanation-block">
+                        <h3>How it works</h3>
+                        <ol>
+                            <li>Uses <strong>two adjacent fixed windows</strong> (previous + current)</li>
+                            <li>Calculates a <strong>weighted count</strong> based on the overlap</li>
+                            <li>Formula: <code>weighted = prev_count × overlap% + current_count</code></li>
+                            <li>If weighted count &lt; limit → <strong>allow</strong>, else → <strong>reject</strong></li>
+                            <li>Achieves sliding window accuracy with <strong>minimal memory</strong></li>
+                        </ol>
+                    </div>
+                    <div class="explanation-block highlight-block">
+                        <h3>💡 Key Insight</h3>
+                        <p>This is the <strong>sweet spot</strong> for most use cases. You only store two counters instead of every timestamp, yet get much better precision than fixed windows. Used by <strong>Cloudflare</strong> and many production systems.</p>
+                    </div>
+                    <div class="algo-params">
+                        <h3>Parameters</h3>
+                        <div class="param-group">
+                            <label>Window Size (seconds)</label>
+                            <input type="range" id="sc-window-size" min="5" max="15" value="10">
+                            <span class="param-value" id="sc-window-size-val">10</span>
+                        </div>
+                        <div class="param-group">
+                            <label>Max Requests per Window</label>
+                            <input type="range" id="sc-max-requests" min="3" max="10" value="5">
+                            <span class="param-value" id="sc-max-requests-val">5</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="algo-visualization">
+                    <div class="viz-container" id="sc-viz">
+                        <div class="sc-visual">
+                            <div class="sc-windows">
+                                <div class="sc-window prev" id="sc-prev-window">
+                                    <div class="sc-window-header">Previous Window</div>
+                                    <div class="sc-window-count" id="sc-prev-count">0</div>
+                                    <div class="sc-window-weight" id="sc-prev-weight">Weight: 0%</div>
+                                </div>
+                                <div class="sc-window-connector">
+                                    <div class="sc-overlap" id="sc-overlap"></div>
+                                </div>
+                                <div class="sc-window current" id="sc-current-window">
+                                    <div class="sc-window-header">Current Window</div>
+                                    <div class="sc-window-count" id="sc-current-count">0</div>
+                                    <div class="sc-timer" id="sc-timer">10s</div>
+                                </div>
+                            </div>
+                            <div class="sc-calculation" id="sc-calculation">
+                                <div class="sc-formula">
+                                    <span class="sc-formula-label">Weighted Count =</span>
+                                    <span id="sc-formula-detail">0 × 100% + 0 = <strong>0</strong></span>
+                                </div>
+                                <div class="sc-result">
+                                    <span>Status:</span>
+                                    <span class="sc-status" id="sc-status">✅ Under limit (0 / 5)</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="request-area">
+                            <button class="send-request-btn" id="sc-send" data-algo="sliding-counter">
+                                <span class="btn-icon">📨</span>
+                                Send Request
+                            </button>
+                            <button class="burst-btn" id="sc-burst" data-algo="sliding-counter">
+                                <span class="btn-icon">💥</span>
+                                Send Burst (5)
+                            </button>
+                            <button class="reset-btn" id="sc-reset" data-algo="sliding-counter">
+                                Reset
+                            </button>
+                        </div>
+                    </div>
+                    <div class="request-log" id="sc-log">
+                        <h4>Request Log</h4>
+                        <div class="log-entries" id="sc-log-entries"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison Section -->
+    <section class="comparison-section" id="comparison">
+        <div class="container">
+            <h2 class="section-title">Algorithm Comparison</h2>
+            <p class="section-subtitle">Understanding the trade-offs to choose the right algorithm</p>
+
+            <div class="comparison-table-wrapper">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>Token Bucket</th>
+                            <th>Leaking Bucket</th>
+                            <th>Fixed Window</th>
+                            <th>Sliding Log</th>
+                            <th>Sliding Counter</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="feature-name">Memory Usage</td>
+                            <td><span class="badge badge-green">Low</span></td>
+                            <td><span class="badge badge-green">Low</span></td>
+                            <td><span class="badge badge-green">Low</span></td>
+                            <td><span class="badge badge-red">High</span></td>
+                            <td><span class="badge badge-green">Low</span></td>
+                        </tr>
+                        <tr>
+                            <td class="feature-name">Accuracy</td>
+                            <td><span class="badge badge-green">High</span></td>
+                            <td><span class="badge badge-green">High</span></td>
+                            <td><span class="badge badge-yellow">Medium</span></td>
+                            <td><span class="badge badge-green">Excellent</span></td>
+                            <td><span class="badge badge-green">High</span></td>
+                        </tr>
+                        <tr>
+                            <td class="feature-name">Burst Handling</td>
+                            <td><span class="badge badge-blue">Allows Bursts</span></td>
+                            <td><span class="badge badge-yellow">Smooths Out</span></td>
+                            <td><span class="badge badge-red">Boundary Issue</span></td>
+                            <td><span class="badge badge-green">Precise</span></td>
+                            <td><span class="badge badge-green">Good</span></td>
+                        </tr>
+                        <tr>
+                            <td class="feature-name">Implementation</td>
+                            <td><span class="badge badge-green">Simple</span></td>
+                            <td><span class="badge badge-green">Simple</span></td>
+                            <td><span class="badge badge-green">Simplest</span></td>
+                            <td><span class="badge badge-yellow">Complex</span></td>
+                            <td><span class="badge badge-yellow">Moderate</span></td>
+                        </tr>
+                        <tr>
+                            <td class="feature-name">Used By</td>
+                            <td>Amazon, Stripe</td>
+                            <td>Network Routers</td>
+                            <td>Simple APIs</td>
+                            <td>Financial Systems</td>
+                            <td>Cloudflare</td>
+                        </tr>
+                        <tr>
+                            <td class="feature-name">Best For</td>
+                            <td>APIs with burst tolerance</td>
+                            <td>Steady output needed</td>
+                            <td>Simple use cases</td>
+                            <td>Strict compliance</td>
+                            <td>Most production systems</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="decision-tree">
+                <h3>Which algorithm should you use?</h3>
+                <div class="decision-cards">
+                    <div class="decision-card">
+                        <div class="decision-icon">🏎️</div>
+                        <h4>Need burst tolerance?</h4>
+                        <p>Use <strong>Token Bucket</strong></p>
+                    </div>
+                    <div class="decision-card">
+                        <div class="decision-icon">🚰</div>
+                        <h4>Need steady output?</h4>
+                        <p>Use <strong>Leaking Bucket</strong></p>
+                    </div>
+                    <div class="decision-card">
+                        <div class="decision-icon">🎯</div>
+                        <h4>Need simplicity?</h4>
+                        <p>Use <strong>Fixed Window Counter</strong></p>
+                    </div>
+                    <div class="decision-card">
+                        <div class="decision-icon">🔬</div>
+                        <h4>Need precision?</h4>
+                        <p>Use <strong>Sliding Window Log</strong></p>
+                    </div>
+                    <div class="decision-card">
+                        <div class="decision-icon">⚡</div>
+                        <h4>Need balance?</h4>
+                        <p>Use <strong>Sliding Window Counter</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <span class="logo-icon">⚡</span>
+                    <span class="logo-text">RateLimiter</span>
+                    <p>An interactive guide to rate limiting algorithms</p>
+                </div>
+                <div class="footer-links">
+                    <a href="#token-bucket">Token Bucket</a>
+                    <a href="#leaking-bucket">Leaking Bucket</a>
+                    <a href="#fixed-window">Fixed Window</a>
+                    <a href="#sliding-log">Sliding Log</a>
+                    <a href="#sliding-counter">Sliding Counter</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>Built with ❤️ for the developer community</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
