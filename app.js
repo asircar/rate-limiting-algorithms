@@ -6,11 +6,11 @@
 // Utility Functions
 // ============================================
 function formatTime(date) {
-    return date.toLocaleTimeString('en-US', { 
-        hour12: false, 
-        hour: '2-digit', 
-        minute: '2-digit', 
-        second: '2-digit' 
+    return date.toLocaleTimeString('en-US', {
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
     }) + '.' + String(date.getMilliseconds()).padStart(3, '0');
 }
 
@@ -55,7 +55,7 @@ function createParticles() {
 function createRainDrops() {
     const container = document.getElementById('requestRain');
     if (!container) return;
-    
+
     setInterval(() => {
         const drop = document.createElement('div');
         drop.className = 'rain-drop';
@@ -238,7 +238,7 @@ const leakingBucket = {
     updateVisual() {
         const queueEl = document.getElementById('lb-queue');
         queueEl.innerHTML = '';
-        
+
         if (this.queue.length === 0) {
             queueEl.innerHTML = '<span style="color: var(--text-muted); font-size: 13px;">Queue empty</span>';
         } else {
@@ -347,7 +347,7 @@ const fixedWindow = {
     updateVisual() {
         const countEl = document.getElementById('fw-count');
         countEl.textContent = this.count;
-        
+
         // Color coding
         const ratio = this.count / this.maxRequests;
         countEl.classList.remove('warning', 'danger');
@@ -389,11 +389,13 @@ const fixedWindow = {
 // ============================================
 const slidingLog = {
     timestamps: [],
+    allTimestamps: [], // Keep all timestamps for display (including expired)
     maxRequests: 5,
     windowSize: 10,
     canvas: null,
     ctx: null,
     animationFrame: null,
+    lastEntriesUpdate: 0,
 
     init() {
         this.maxRequests = parseInt(document.getElementById('sl-max-requests').value);
@@ -427,30 +429,28 @@ const slidingLog = {
         this.canvas.height = 120;
     },
 
-    cleanupOld() {
+    getActiveTimestamps() {
         const now = Date.now();
         const cutoff = now - this.windowSize * 1000;
-        this.timestamps = this.timestamps.filter(t => t.time >= cutoff);
+        return this.allTimestamps.filter(t => t.time >= cutoff);
     },
 
     getActiveCount() {
-        this.cleanupOld();
-        return this.timestamps.filter(t => t.active).length;
+        return this.getActiveTimestamps().filter(t => t.active).length;
     },
 
     handleRequest() {
-        this.cleanupOld();
         const activeCount = this.getActiveCount();
 
         if (activeCount < this.maxRequests) {
-            this.timestamps.push({ time: Date.now(), active: true });
+            this.allTimestamps.push({ time: Date.now(), active: true });
             addLogEntry('sl-log-entries', '✅ ALLOWED', `In window: ${activeCount + 1}/${this.maxRequests}`, 'accepted');
         } else {
-            this.timestamps.push({ time: Date.now(), active: false });
+            this.allTimestamps.push({ time: Date.now(), active: false });
             addLogEntry('sl-log-entries', '❌ REJECTED', `Window full: ${activeCount}/${this.maxRequests}`, 'rejected');
         }
         this.updateInfo();
-        this.updateEntries();
+        this.updateEntries(true); // Force immediate update
     },
 
     handleBurst() {
@@ -462,21 +462,29 @@ const slidingLog = {
     updateInfo() {
         const active = this.getActiveCount();
         document.getElementById('sl-count').textContent = `${active} / ${this.maxRequests}`;
-        document.getElementById('sl-timestamps').textContent = this.timestamps.length;
+        document.getElementById('sl-timestamps').textContent = this.getActiveTimestamps().length;
     },
 
-    updateEntries() {
+    updateEntries(force = false) {
+        const now = Date.now();
+        // Throttle updates to every 500ms unless forced (e.g., on new request)
+        if (!force && now - this.lastEntriesUpdate < 500) return;
+        this.lastEntriesUpdate = now;
+
         const container = document.getElementById('sl-entries');
         container.innerHTML = '';
-        const now = Date.now();
         const cutoff = now - this.windowSize * 1000;
+        // Remove very old timestamps (older than 2x window size) to prevent memory buildup
+        const displayCutoff = now - this.windowSize * 2 * 1000;
+        this.allTimestamps = this.allTimestamps.filter(t => t.time >= displayCutoff);
 
         // Show last 20 timestamps
-        const recent = this.timestamps.slice(-20);
+        const recent = this.allTimestamps.slice(-20);
         recent.forEach(t => {
             const entry = document.createElement('span');
             const isExpired = t.time < cutoff;
-            entry.className = `sl-entry${isExpired ? ' expired' : ''}`;
+            const isRejected = !t.active;
+            entry.className = `sl-entry${isExpired ? ' expired' : ''}${isRejected ? ' rejected' : ''}`;
             const age = ((now - t.time) / 1000).toFixed(1);
             entry.textContent = `${age}s ago`;
             container.appendChild(entry);
@@ -533,19 +541,19 @@ const slidingLog = {
                 this.ctx.stroke();
             }
 
-            // Draw requests
-            this.timestamps.forEach(t => {
+            // Use allTimestamps for canvas drawing (includes expired for visual effect)
+            const activeTimestamps = this.getActiveTimestamps();
+            activeTimestamps.forEach(t => {
                 const age = now - t.time;
                 const x = width - (age * pixelsPerMs);
                 if (x < -10 || x > width + 10) return;
 
                 const inWindow = age <= this.windowSize * 1000;
-                const y = 30 + Math.random() * (height - 60);
 
                 // Draw dot
                 this.ctx.beginPath();
                 this.ctx.arc(x, height / 2, 6, 0, Math.PI * 2);
-                
+
                 if (!t.active) {
                     this.ctx.fillStyle = 'rgba(225, 112, 85, 0.8)';
                 } else if (inWindow) {
@@ -564,7 +572,7 @@ const slidingLog = {
                 }
             });
 
-            // Update info
+            // Throttled updates for info and entries
             this.updateInfo();
             this.updateEntries();
 
@@ -574,7 +582,7 @@ const slidingLog = {
     },
 
     reset() {
-        this.timestamps = [];
+        this.allTimestamps = [];
         this.updateInfo();
         document.getElementById('sl-entries').innerHTML = '';
         document.getElementById('sl-log-entries').innerHTML = '';
@@ -707,7 +715,7 @@ function initScrollAnimations() {
                 entry.target.classList.add('visible');
             }
         });
-    }, { 
+    }, {
         threshold: 0.1,
         rootMargin: '-50px'
     });
@@ -749,8 +757,8 @@ function initNavHighlighting() {
             if (entry.isIntersecting) {
                 const id = entry.target.id;
                 navLinks.forEach(link => {
-                    link.style.color = link.getAttribute('href') === `#${id}` 
-                        ? 'var(--accent-secondary)' 
+                    link.style.color = link.getAttribute('href') === `#${id}`
+                        ? 'var(--accent-secondary)'
                         : '';
                 });
             }
@@ -766,7 +774,7 @@ function initNavHighlighting() {
 document.addEventListener('DOMContentLoaded', () => {
     createParticles();
     createRainDrops();
-    
+
     tokenBucket.init();
     leakingBucket.init();
     fixedWindow.init();
