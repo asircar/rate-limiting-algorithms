@@ -1,15 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rate Limiting Algorithms — Interactive Visual Guide</title>
-    <meta name="description" content="An interactive visual guide to understanding rate limiting algorithms: Token Bucket, Leaking Bucket, Fixed Window Counter, Sliding Window Log, and Sliding Window Counter.">
+
+    <!-- Primary SEO -->
+    <title>Rate Limiting Algorithms — Interactive Visual Guide | Learn Token Bucket, Sliding Window & More</title>
+    <meta name="description"
+        content="Learn rate limiting algorithms through interactive visualizations. Explore Token Bucket, Leaking Bucket, Fixed Window Counter, Sliding Window Log, and Sliding Window Counter with hands-on demos.">
+    <meta name="keywords"
+        content="rate limiting algorithms, token bucket, leaking bucket, fixed window counter, sliding window log, sliding window counter, system design, rate limiter, API rate limiting, interactive tutorial, visual guide">
+    <meta name="author" content="Arunava Sircar">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://ratelimit.arunavasircar.com/">
+
+    <!-- Open Graph (Facebook, LinkedIn) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Rate Limiting Algorithms — Interactive Visual Guide">
+    <meta property="og:description"
+        content="Explore 5 rate limiting algorithms through interactive visualizations. Click, experiment, and build intuition for Token Bucket, Leaking Bucket, Fixed Window, Sliding Window Log, and Sliding Window Counter.">
+    <meta property="og:url" content="https://ratelimit.arunavasircar.com/">
+    <meta property="og:site_name" content="Rate Limiting Algorithms Guide">
+    <meta property="og:locale" content="en_US">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Rate Limiting Algorithms — Interactive Visual Guide">
+    <meta name="twitter:description"
+        content="Learn 5 rate limiting algorithms through interactive, hands-on visualizations. Built for developers and students.">
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "LearningResource",
+        "name": "Rate Limiting Algorithms — Interactive Visual Guide",
+        "description": "An interactive visual guide to understanding rate limiting algorithms: Token Bucket, Leaking Bucket, Fixed Window Counter, Sliding Window Log, and Sliding Window Counter.",
+        "url": "https://ratelimit.arunavasircar.com/",
+        "author": {
+            "@type": "Person",
+            "name": "Arunava Sircar",
+            "url": "https://arunavasircar.com"
+        },
+        "educationalLevel": "Intermediate",
+        "learningResourceType": "Interactive tutorial",
+        "teaches": [
+            "Rate limiting",
+            "Token Bucket algorithm",
+            "Leaking Bucket algorithm",
+            "Fixed Window Counter",
+            "Sliding Window Log",
+            "Sliding Window Counter",
+            "System Design",
+            "API rate limiting"
+        ],
+        "inLanguage": "en",
+        "isAccessibleForFree": true
+    }
+    </script>
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <!-- Floating particles background -->
     <div class="particles" id="particles"></div>
@@ -38,7 +97,7 @@
                 Algorithms
             </h1>
             <p class="hero-subtitle">
-                Explore how different rate limiting strategies work through interactive visualizations. 
+                Explore how different rate limiting strategies work through interactive visualizations.
                 Click, experiment, and build intuition for each algorithm.
             </p>
             <div class="hero-actions">
@@ -73,8 +132,10 @@
                 <div class="intro-text">
                     <h2>Why Rate Limiting?</h2>
                     <p>
-                        Rate limiting is a critical technique used to control the rate of requests that clients can make to an API or service. 
-                        It protects your systems from being overwhelmed, ensures fair usage among clients, and prevents abuse.
+                        Rate limiting is a critical technique used to control the rate of requests that clients can make
+                        to an API or service.
+                        It protects your systems from being overwhelmed, ensures fair usage among clients, and prevents
+                        abuse.
                     </p>
                     <div class="intro-cards">
                         <div class="intro-card">
@@ -135,7 +196,9 @@
                     </div>
                     <div class="explanation-block highlight-block">
                         <h3>💡 Key Insight</h3>
-                        <p>Token Bucket is widely used (e.g., by <strong>Amazon</strong> and <strong>Stripe</strong>) because it smooths out traffic while still allowing short bursts. If a client hasn't made requests in a while, they can "spend" their accumulated tokens in a burst.</p>
+                        <p>Token Bucket is widely used (e.g., by <strong>Amazon</strong> and <strong>Stripe</strong>)
+                            because it smooths out traffic while still allowing short bursts. If a client hasn't made
+                            requests in a while, they can "spend" their accumulated tokens in a burst.</p>
                     </div>
                     <div class="algo-params">
                         <h3>Parameters</h3>
@@ -215,7 +278,9 @@
                     </div>
                     <div class="explanation-block highlight-block">
                         <h3>💡 Key Insight</h3>
-                        <p>Unlike Token Bucket, Leaking Bucket <strong>does not allow bursts</strong> — it always processes at a constant rate. Think of it like water dripping from a leaky bucket: no matter how fast you pour water in, it drips out at the same pace.</p>
+                        <p>Unlike Token Bucket, Leaking Bucket <strong>does not allow bursts</strong> — it always
+                            processes at a constant rate. Think of it like water dripping from a leaky bucket: no matter
+                            how fast you pour water in, it drips out at the same pace.</p>
                     </div>
                     <div class="algo-params">
                         <h3>Parameters</h3>
@@ -295,7 +360,9 @@
                     </div>
                     <div class="explanation-block highlight-block">
                         <h3>⚠️ The Boundary Problem</h3>
-                        <p>The main weakness: a burst of requests at the <strong>end of one window</strong> and the <strong>start of the next</strong> can effectively allow <strong>2x the rate limit</strong>. Watch the visualization to see this in action!</p>
+                        <p>The main weakness: a burst of requests at the <strong>end of one window</strong> and the
+                            <strong>start of the next</strong> can effectively allow <strong>2x the rate limit</strong>.
+                            Watch the visualization to see this in action!</p>
                     </div>
                     <div class="algo-params">
                         <h3>Parameters</h3>
@@ -379,15 +446,19 @@
                         <h3>How it works</h3>
                         <ol>
                             <li>Keeps a <strong>log of timestamps</strong> for each request</li>
-                            <li>When a new request arrives, <strong>remove outdated</strong> entries (older than window size)</li>
-                            <li>Count remaining entries — if count &lt; limit, <strong>allow</strong> and add timestamp</li>
+                            <li>When a new request arrives, <strong>remove outdated</strong> entries (older than window
+                                size)</li>
+                            <li>Count remaining entries — if count &lt; limit, <strong>allow</strong> and add timestamp
+                            </li>
                             <li>If count ≥ limit, <strong>reject</strong> the request</li>
                             <li>The window <strong>slides continuously</strong> — no boundary issues!</li>
                         </ol>
                     </div>
                     <div class="explanation-block highlight-block">
                         <h3>💡 Key Insight</h3>
-                        <p>This solves the Fixed Window boundary problem but requires <strong>more memory</strong> — it stores every request timestamp. The trade-off is <strong>precision vs. memory usage</strong>.</p>
+                        <p>This solves the Fixed Window boundary problem but requires <strong>more memory</strong> — it
+                            stores every request timestamp. The trade-off is <strong>precision vs. memory
+                                usage</strong>.</p>
                     </div>
                     <div class="algo-params">
                         <h3>Parameters</h3>
@@ -458,7 +529,8 @@
                 <div class="algo-number">05</div>
                 <div class="algo-title-group">
                     <h2 class="algo-title">Sliding Window Counter</h2>
-                    <p class="algo-tagline">Best of both worlds — combines Fixed Window efficiency with Sliding Window accuracy</p>
+                    <p class="algo-tagline">Best of both worlds — combines Fixed Window efficiency with Sliding Window
+                        accuracy</p>
                 </div>
             </div>
 
@@ -470,13 +542,16 @@
                             <li>Uses <strong>two adjacent fixed windows</strong> (previous + current)</li>
                             <li>Calculates a <strong>weighted count</strong> based on the overlap</li>
                             <li>Formula: <code>weighted = prev_count × overlap% + current_count</code></li>
-                            <li>If weighted count &lt; limit → <strong>allow</strong>, else → <strong>reject</strong></li>
+                            <li>If weighted count &lt; limit → <strong>allow</strong>, else → <strong>reject</strong>
+                            </li>
                             <li>Achieves sliding window accuracy with <strong>minimal memory</strong></li>
                         </ol>
                     </div>
                     <div class="explanation-block highlight-block">
                         <h3>💡 Key Insight</h3>
-                        <p>This is the <strong>sweet spot</strong> for most use cases. You only store two counters instead of every timestamp, yet get much better precision than fixed windows. Used by <strong>Cloudflare</strong> and many production systems.</p>
+                        <p>This is the <strong>sweet spot</strong> for most use cases. You only store two counters
+                            instead of every timestamp, yet get much better precision than fixed windows. Used by
+                            <strong>Cloudflare</strong> and many production systems.</p>
                     </div>
                     <div class="algo-params">
                         <h3>Parameters</h3>
@@ -674,4 +749,5 @@
 
     <script src="app.js"></script>
 </body>
+
 </html>
