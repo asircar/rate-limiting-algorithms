@@ -15,6 +15,11 @@
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://ratelimit.arunavasircar.com/">
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
     <!-- Open Graph (Facebook, LinkedIn) -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="Rate Limiting Algorithms — Interactive Visual Guide">
@@ -362,7 +367,8 @@
                         <h3>⚠️ The Boundary Problem</h3>
                         <p>The main weakness: a burst of requests at the <strong>end of one window</strong> and the
                             <strong>start of the next</strong> can effectively allow <strong>2x the rate limit</strong>.
-                            Watch the visualization to see this in action!</p>
+                            Watch the visualization to see this in action!
+                        </p>
                     </div>
                     <div class="algo-params">
                         <h3>Parameters</h3>
@@ -551,7 +557,8 @@
                         <h3>💡 Key Insight</h3>
                         <p>This is the <strong>sweet spot</strong> for most use cases. You only store two counters
                             instead of every timestamp, yet get much better precision than fixed windows. Used by
-                            <strong>Cloudflare</strong> and many production systems.</p>
+                            <strong>Cloudflare</strong> and many production systems.
+                        </p>
                     </div>
                     <div class="algo-params">
                         <h3>Parameters</h3>
