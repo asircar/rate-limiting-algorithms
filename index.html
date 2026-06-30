@@ -6,11 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Primary SEO -->
-    <title>Rate Limiting Algorithms — Interactive Visual Guide | Learn Token Bucket, Sliding Window & More</title>
+    <title>Rate Limiting Algorithms — Interactive Visual Guide & Python Implementations</title>
     <meta name="description"
-        content="Learn rate limiting algorithms through interactive visualizations. Explore Token Bucket, Leaking Bucket, Fixed Window Counter, Sliding Window Log, and Sliding Window Counter with hands-on demos.">
+        content="Learn Token Bucket, Leaking Bucket, Fixed Window, Sliding Window Log, and Sliding Window Counter rate limiting algorithms with interactive visualizations and production-ready Python code.">
     <meta name="keywords"
-        content="rate limiting algorithms, token bucket, leaking bucket, fixed window counter, sliding window log, sliding window counter, system design, rate limiter, API rate limiting, interactive tutorial, visual guide">
+        content="rate limiting algorithms, token bucket algorithm python, leaking bucket code, fixed window counter, sliding window log, sliding window counter python, system design rate limiter, API rate limiting headers, HTTP 429, API throttling">
     <meta name="author" content="Arunava Sircar">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://ratelimit.arunavasircar.com/">
@@ -22,18 +22,18 @@
 
     <!-- Open Graph (Facebook, LinkedIn) -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Rate Limiting Algorithms — Interactive Visual Guide">
+    <meta property="og:title" content="Rate Limiting Algorithms — Interactive Visual Guide & Python Code">
     <meta property="og:description"
-        content="Explore 5 rate limiting algorithms through interactive visualizations. Click, experiment, and build intuition for Token Bucket, Leaking Bucket, Fixed Window, Sliding Window Log, and Sliding Window Counter.">
+        content="Interactive animations and Python code examples for Token Bucket, Leaking Bucket, Fixed Window, Sliding Window Log, and Sliding Window Counter rate limiters.">
     <meta property="og:url" content="https://ratelimit.arunavasircar.com/">
     <meta property="og:site_name" content="Rate Limiting Algorithms Guide">
     <meta property="og:locale" content="en_US">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Rate Limiting Algorithms — Interactive Visual Guide">
+    <meta name="twitter:title" content="Rate Limiting Algorithms — Interactive Visual Guide & Python Code">
     <meta name="twitter:description"
-        content="Learn 5 rate limiting algorithms through interactive, hands-on visualizations. Built for developers and students.">
+        content="Learn rate limiting algorithms visually with interactive sandboxes and clean Python code implementations.">
 
     <!-- Structured Data (JSON-LD) -->
     <script type="application/ld+json">
@@ -71,7 +71,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=1.0.1">
 </head>
 
 <body>
@@ -91,7 +91,10 @@
                 <a href="#fixed-window">Fixed Window</a>
                 <a href="#sliding-log">Sliding Log</a>
                 <a href="#sliding-counter">Sliding Counter</a>
+                <a href="#headers">HTTP Standards</a>
                 <a href="#comparison">Compare</a>
+                <a href="#faq">FAQ</a>
+                <a href="https://www.arunavasircar.com/" target="_blank" rel="noopener noreferrer" style="color: var(--accent-secondary); font-weight: 600;">Creator ↗</a>
             </div>
         </nav>
         <div class="hero-content">
@@ -218,6 +221,36 @@
                             <span class="param-value" id="tb-refill-val">1</span>
                         </div>
                     </div>
+
+                    <details class="seo-accordion">
+                        <summary>🐍 View Python Implementation</summary>
+                        <div class="accordion-content">
+                            <pre class="code-block"><code><span class="kwd">import</span> time
+
+<span class="kwd">class</span> <span class="cls">TokenBucket</span>:
+    <span class="kwd">def</span> <span class="fn">__init__</span>(<span class="self">self</span>, capacity: <span class="fn">int</span>, refill_rate: <span class="fn">float</span>):
+        <span class="self">self</span>.capacity = capacity
+        <span class="self">self</span>.refill_rate = refill_rate
+        <span class="self">self</span>.tokens = <span class="fn">float</span>(capacity)
+        <span class="self">self</span>.last_refill = time.<span class="fn">time</span>()
+
+    <span class="kwd">def</span> <span class="fn">allow_request</span>(<span class="self">self</span>) -> <span class="fn">bool</span>:
+        now = time.<span class="fn">time</span>()
+        elapsed = now - <span class="self">self</span>.last_refill
+        
+        <span class="cmt"># Refill tokens based on elapsed time</span>
+        <span class="self">self</span>.tokens = <span class="fn">min</span>(
+            <span class="self">self</span>.capacity,
+            <span class="self">self</span>.tokens + elapsed * <span class="self">self</span>.refill_rate
+        )
+        <span class="self">self</span>.last_refill = now
+        
+        <span class="kwd">if</span> <span class="self">self</span>.tokens >= <span class="num">1.0</span>:
+            <span class="self">self</span>.tokens -= <span class="num">1.0</span>
+            <span class="kwd">return</span> <span class="kwd">True</span>
+        <span class="kwd">return</span> <span class="kwd">False</span></code></pre>
+                        </div>
+                    </details>
                 </div>
 
                 <div class="algo-visualization">
@@ -300,6 +333,39 @@
                             <span class="param-value" id="lb-leak-rate-val">1</span>
                         </div>
                     </div>
+
+                    <details class="seo-accordion">
+                        <summary>🐍 View Python Implementation</summary>
+                        <div class="accordion-content">
+                            <pre class="code-block"><code><span class="kwd">import</span> time
+<span class="kwd">from</span> collections <span class="kwd">import</span> deque
+
+<span class="kwd">class</span> <span class="cls">LeakingBucket</span>:
+    <span class="kwd">def</span> <span class="fn">__init__</span>(<span class="self">self</span>, capacity: <span class="fn">int</span>, leak_rate: <span class="fn">float</span>):
+        <span class="self">self</span>.capacity = capacity
+        <span class="self">self</span>.leak_rate = leak_rate <span class="cmt"># requests per second</span>
+        <span class="self">self</span>.queue = <span class="fn">deque</span>()
+        <span class="self">self</span>.last_leak = time.<span class="fn">time</span>()
+
+    <span class="kwd">def</span> <span class="fn">_leak</span>(<span class="self">self</span>):
+        now = time.<span class="fn">time</span>()
+        elapsed = now - <span class="self">self</span>.last_leak
+        leaked = <span class="fn">int</span>(elapsed * <span class="self">self</span>.leak_rate)
+        
+        <span class="kwd">if</span> leaked > <span class="num">0</span>:
+            <span class="cmt"># Process (leak) requests from queue</span>
+            <span class="kwd">for</span> _ <span class="kwd">in</span> <span class="fn">range</span>(<span class="fn">min</span>(leaked, <span class="fn">len</span>(<span class="self">self</span>.queue))):
+                <span class="self">self</span>.queue.<span class="fn">popleft</span>()
+            self.last_leak = now
+
+    <span class="kwd">def</span> <span class="fn">add_request</span>(<span class="self">self</span>) -> <span class="fn">bool</span>:
+        <span class="self">self</span>.<span class="fn">_leak</span>()
+        <span class="kwd">if</span> <span class="fn">len</span>(<span class="self">self</span>.queue) &lt; <span class="self">self</span>.capacity:
+            <span class="self">self</span>.queue.<span class="fn">append</span>(time.<span class="fn">time</span>())
+            <span class="kwd">return</span> <span class="kwd">True</span>
+        <span class="kwd">return</span> <span class="kwd">False</span></code></pre>
+                        </div>
+                    </details>
                 </div>
 
                 <div class="algo-visualization">
@@ -383,6 +449,33 @@
                             <span class="param-value" id="fw-max-requests-val">5</span>
                         </div>
                     </div>
+
+                    <details class="seo-accordion">
+                        <summary>🐍 View Python Implementation</summary>
+                        <div class="accordion-content">
+                            <pre class="code-block"><code><span class="kwd">import</span> time
+
+<span class="kwd">class</span> <span class="cls">FixedWindowCounter</span>:
+    <span class="kwd">def</span> <span class="fn">__init__</span>(<span class="self">self</span>, limit: <span class="fn">int</span>, window_size: <span class="fn">float</span>):
+        <span class="self">self</span>.limit = limit
+        <span class="self">self</span>.window_size = window_size
+        <span class="self">self</span>.count = <span class="num">0</span>
+        <span class="self">self</span>.window_start = time.<span class="fn">time</span>()
+
+    <span class="kwd">def</span> <span class="fn">allow_request</span>(<span class="self">self</span>) -> <span class="fn">bool</span>:
+        now = time.<span class="fn">time</span>()
+        
+        <span class="kwd">if</span> now - <span class="self">self</span>.window_start >= <span class="self">self</span>.window_size:
+            <span class="cmt"># Reset the counter and slide window start</span>
+            <span class="self">self</span>.count = <span class="num">0</span>
+            <span class="self">self</span>.window_start = now
+            
+        <span class="kwd">if</span> <span class="self">self</span>.count &lt; <span class="self">self</span>.limit:
+            <span class="self">self</span>.count += <span class="num">1</span>
+            <span class="kwd">return</span> <span class="kwd">True</span>
+        <span class="kwd">return</span> <span class="kwd">False</span></code></pre>
+                        </div>
+                    </details>
                 </div>
 
                 <div class="algo-visualization">
@@ -479,6 +572,31 @@
                             <span class="param-value" id="sl-max-requests-val">5</span>
                         </div>
                     </div>
+
+                    <details class="seo-accordion">
+                        <summary>🐍 View Python Implementation</summary>
+                        <div class="accordion-content">
+                            <pre class="code-block"><code><span class="kwd">import</span> time
+
+<span class="kwd">class</span> <span class="cls">SlidingWindowLog</span>:
+    <span class="kwd">def</span> <span class="fn">__init__</span>(<span class="self">self</span>, limit: <span class="fn">int</span>, window_size: <span class="fn">float</span>):
+        <span class="self">self</span>.limit = limit
+        <span class="self">self</span>.window_size = window_size
+        <span class="self">self</span>.timestamps = []
+
+    <span class="kwd">def</span> <span class="fn">allow_request</span>(<span class="self">self</span>) -> <span class="fn">bool</span>:
+        now = time.<span class="fn">time</span>()
+        cutoff = now - <span class="self">self</span>.window_size
+        
+        <span class="cmt"># Filter out expired timestamps</span>
+        <span class="self">self</span>.timestamps = [t <span class="kwd">for</span> t <span class="kwd">in</span> <span class="self">self</span>.timestamps <span class="kwd">if</span> t >= cutoff]
+        
+        <span class="kwd">if</span> <span class="fn">len</span>(<span class="self">self</span>.timestamps) &lt; <span class="self">self</span>.limit:
+            <span class="self">self</span>.timestamps.<span class="fn">append</span>(now)
+            <span class="kwd">return</span> <span class="kwd">True</span>
+        <span class="kwd">return</span> <span class="kwd">False</span></code></pre>
+                        </div>
+                    </details>
                 </div>
 
                 <div class="algo-visualization">
@@ -573,6 +691,41 @@
                             <span class="param-value" id="sc-max-requests-val">5</span>
                         </div>
                     </div>
+
+                    <details class="seo-accordion">
+                        <summary>🐍 View Python Implementation</summary>
+                        <div class="accordion-content">
+                            <pre class="code-block"><code><span class="kwd">import</span> time
+
+<span class="kwd">class</span> <span class="cls">SlidingWindowCounter</span>:
+    <span class="kwd">def</span> <span class="fn">__init__</span>(<span class="self">self</span>, limit: <span class="fn">int</span>, window_size: <span class="fn">float</span>):
+        <span class="self">self</span>.limit = limit
+        <span class="self">self</span>.window_size = window_size
+        <span class="self">self</span>.prev_count = <span class="num">0</span>
+        <span class="self">self</span>.current_count = <span class="num">0</span>
+        <span class="self">self</span>.window_start = time.<span class="fn">time</span>()
+
+    <span class="kwd">def</span> <span class="fn">allow_request</span>(<span class="self">self</span>) -> <span class="fn">bool</span>:
+        now = time.<span class="fn">time</span>()
+        elapsed = now - <span class="self">self</span>.window_start
+        
+        <span class="kwd">if</span> elapsed >= <span class="self">self</span>.window_size:
+            <span class="cmt"># Shift window counters</span>
+            <span class="self">self</span>.prev_count = <span class="self">self</span>.current_count
+            <span class="self">self</span>.current_count = <span class="num">0</span>
+            <span class="self">self</span>.window_start = now
+            elapsed = <span class="num">0.0</span>
+            
+        <span class="cmt"># Estimate requests based on overlap weight</span>
+        overlap = <span class="num">1.0</span> - (elapsed / <span class="self">self</span>.window_size)
+        weighted_count = <span class="self">self</span>.prev_count * overlap + <span class="self">self</span>.current_count
+        
+        <span class="kwd">if</span> weighted_count &lt; <span class="self">self</span>.limit:
+            <span class="self">self</span>.current_count += <span class="num">1</span>
+            <span class="kwd">return</span> <span class="kwd">True</span>
+        <span class="kwd">return</span> <span class="kwd">False</span></code></pre>
+                        </div>
+                    </details>
                 </div>
 
                 <div class="algo-visualization">
@@ -621,6 +774,80 @@
                     <div class="request-log" id="sc-log">
                         <h4>Request Log</h4>
                         <div class="log-entries" id="sc-log-entries"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HTTP Headers Section -->
+    <section class="headers-section" id="headers">
+        <div class="container">
+            <h2 class="section-title" style="text-align: center;">HTTP Response Standards</h2>
+            <p class="section-subtitle" style="text-align: center; margin-bottom: 40px;">How production APIs communicate rate limits to clients</p>
+
+            <div class="headers-grid">
+                <div class="header-card">
+                    <div class="header-card-title">
+                        <span class="header-name">X-RateLimit-Limit</span>
+                        <span class="header-status-badge badge-standard">Standard</span>
+                    </div>
+                    <p class="header-desc">Specifies the maximum number of requests allowed within the current rate limiting window.</p>
+                    <div class="header-example">
+                        <div class="example-line">
+                            <span class="example-key">X-RateLimit-Limit:</span>
+                            <span class="example-val">100</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="header-card">
+                    <div class="header-card-title">
+                        <span class="header-name">X-RateLimit-Remaining</span>
+                        <span class="header-status-badge badge-standard">Standard</span>
+                    </div>
+                    <p class="header-desc">Indicates the number of requests remaining in the current window before a block occurs.</p>
+                    <div class="header-example">
+                        <div class="example-line">
+                            <span class="example-key">X-RateLimit-Remaining:</span>
+                            <span class="example-val">42</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="header-card">
+                    <div class="header-card-title">
+                        <span class="header-name">X-RateLimit-Reset</span>
+                        <span class="header-status-badge badge-standard">Standard</span>
+                    </div>
+                    <p class="header-desc">Specifies the Unix epoch timestamp indicating exactly when the current window resets and counters clear.</p>
+                    <div class="header-example">
+                        <div class="example-line">
+                            <span class="example-key">X-RateLimit-Reset:</span>
+                            <span class="example-val">1719747600</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="header-card">
+                    <div class="header-card-title">
+                        <span class="header-name">Retry-After</span>
+                        <span class="header-status-badge badge-429">Block Header</span>
+                    </div>
+                    <p class="header-desc">Sent during a block. Tells the client exactly how many seconds to wait before trying the request again.</p>
+                    <div class="header-example">
+                        <div class="example-line">
+                            <span class="example-key">Retry-After:</span>
+                            <span class="example-val">30</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="status-callout">
+                    <div class="status-icon">🚨</div>
+                    <div class="status-info">
+                        <h4>HTTP Status Code 429: Too Many Requests</h4>
+                        <p>When a client exceeds their rate limit, servers reject the connection with an HTTP Status Code <code>429 Too Many Requests</code>. Standardized under RFC 6585, clients should back off and observe the <code>Retry-After</code> header to prevent getting banned.</p>
                     </div>
                 </div>
             </div>
@@ -731,6 +958,51 @@
         </div>
     </section>
 
+    <!-- FAQ Section -->
+    <section class="faq-section" id="faq">
+        <div class="container">
+            <h2 class="section-title" style="text-align: center;">Frequently Asked Questions</h2>
+            <p class="section-subtitle" style="text-align: center;">Got questions about rate limiting? We've got answers.</p>
+
+            <div class="faq-container">
+                <details class="seo-accordion faq-item">
+                    <summary>What is the difference between rate limiting and throttling?</summary>
+                    <div class="accordion-content">
+                        <p><strong>Rate limiting</strong> generally refers to hard limits placed on requests (e.g., maximum 100 requests per minute), where any requests above the limit are rejected immediately with an HTTP 429 error.</p>
+                        <p><strong>Throttling</strong> is the process of slowing down request execution or limiting bandwidth/processing rates dynamically rather than failing outright. Leaking Bucket is a good example of a throttling rate limiter.</p>
+                    </div>
+                </details>
+
+                <details class="seo-accordion faq-item">
+                    <summary>Why is Redis commonly used for distributed rate limiters?</summary>
+                    <div class="accordion-content">
+                        <p>In distributed environments with multiple server instances, rate limiter state must be shared. <strong>Redis</strong> is ideal because:</p>
+                        <ul>
+                            <li>It stores state in-memory for microsecond operations.</li>
+                            <li>It supports atomic operations (like <code>INCR</code> and Lua scripts) to prevent race conditions.</li>
+                            <li>It supports expiring keys via <code>EXPIRE</code>, which makes implementing Fixed Window rate limiters straightforward.</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <details class="seo-accordion faq-item">
+                    <summary>How does the Sliding Window Counter algorithm improve on the Fixed Window approach?</summary>
+                    <div class="accordion-content">
+                        <p>The <strong>Fixed Window Counter</strong> algorithm suffers from a boundary problem where a client can make double their limit at the edge of window resets. For instance, if the limit is 10/min, they can send 10 requests at 0:59 and another 10 at 1:01, resulting in 20 requests in 2 seconds.</p>
+                        <p>The <strong>Sliding Window Counter</strong> solves this by taking a weighted average of the request count from both the previous and current window, smoothing out the rate calculation without storing all request timestamps like a Sliding Log would.</p>
+                    </div>
+                </details>
+
+                <details class="seo-accordion faq-item">
+                    <summary>Is there an RFC standard for rate limiting headers?</summary>
+                    <div class="accordion-content">
+                        <p>While headers like <code>X-RateLimit-*</code> are widely used by services like GitHub and Stripe, they are not standard RFCs. However, the IETF is working on standardizing rate limit headers under <strong>RFC 9126</strong>, suggesting response headers like <code>RateLimit-Limit</code>, <code>RateLimit-Remaining</code>, and <code>RateLimit-Reset</code> (replacing the "X-" prefix).</p>
+                    </div>
+                </details>
+            </div>
+        </div>
+    </section>
+
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
@@ -746,10 +1018,12 @@
                     <a href="#fixed-window">Fixed Window</a>
                     <a href="#sliding-log">Sliding Log</a>
                     <a href="#sliding-counter">Sliding Counter</a>
+                    <a href="#headers">HTTP Standards</a>
+                    <a href="#faq">FAQ</a>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>Built with ❤️ for the developer community</p>
+                <p>Built with ❤️ by <a href="https://www.arunavasircar.com/" target="_blank" rel="noopener noreferrer" style="color: var(--accent-secondary); font-weight: 500; text-decoration: underline;">Arunava Sircar</a> for the developer community</p>
             </div>
         </div>
     </footer>

@@ -720,7 +720,7 @@ function initScrollAnimations() {
         rootMargin: '-50px'
     });
 
-    document.querySelectorAll('.algo-section, .intro-section, .comparison-section').forEach(section => {
+    document.querySelectorAll('.algo-section, .intro-section, .comparison-section, .headers-section, .faq-section').forEach(section => {
         section.style.opacity = '0';
         section.style.transform = 'translateY(30px)';
         section.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
@@ -749,7 +749,7 @@ document.head.appendChild(style);
 // Active Nav Link Highlighting
 // ============================================
 function initNavHighlighting() {
-    const sections = document.querySelectorAll('.algo-section, .comparison-section');
+    const sections = document.querySelectorAll('.algo-section, .comparison-section, .headers-section, .faq-section');
     const navLinks = document.querySelectorAll('.nav-links a');
 
     const observer = new IntersectionObserver((entries) => {
